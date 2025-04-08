@@ -30,6 +30,8 @@ Users can enter a VR space, see models loaded from a specified list, point at th
 3.  **Access:** Open the URL provided by Vite (e.g., `http://localhost:5173` or your ngrok/tunnel URL) in a WebXR-compatible browser (like Meta Quest Browser).
 4.  **Enter VR:** Click the "Enter VR" button displayed on the page.
 
+**Note on Vite Configuration:** The `vite.config.js` file is configured with `allowedHosts: ['.ngrok-free.app']` to allow access via ngrok tunnels during development. You may need to adjust this setting if accessing the development server directly or using a different tunneling service.
+
 ## Controls
 
 *   **Desktop:**
@@ -65,4 +67,4 @@ To change the 3D models displayed in the experience:
 3.  Add or modify the relative path (starting with `3d-models/`, e.g., `3d-models/your-model.glb`) for each model you want to load within the JSON array.
 4.  **Important:** Restart the Vite development server (`npm run dev`) for the changes to the model list to take effect.
 
-The application will automatically read `src/model-list.json` on startup and attempt to load, position, and create physics bodies for each listed model. 
+The application will automatically read `src/model-list.json` on startup and attempt to load, position, and create physics bodies for each listed model.

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler", // Recommended for Vite
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true, // To allow importing model-list.json
+    "isolatedModules": true, // Required by Vite
+    "noEmit": true, // Vite handles transpilation, TS only type checks
+    "jsx": "preserve", // Common in Vite setups, though not strictly needed here
+    "lib": ["ESNext", "DOM", "DOM.Iterable"] // Add standard browser libs
+  },
+  "include": ["src"] // Specify source directory
+}
