@@ -1,6 +1,6 @@
-# WebXR GLB Viewer with Physics Grabbing
+# 3D Web Gallery (WebXR with Physics Grabbing)
 
-This project is a simple WebXR application that allows users to view and interact with 3D models (`.glb` files) in a virtual reality environment. It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server.
+This project is a 3D Web Gallery application allowing users to view and interact with 3D models (`.glb` files) in a WebXR virtual reality environment. It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server.
 
 Users can enter a VR space, see models loaded from a specified list, point at them with VR controllers, grab them from any distance, move them around, and throw them using physics.
 

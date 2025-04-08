@@ -1,6 +1,6 @@
-# WebXR Object Grabbing with Three.js and Cannon-es
+# 3D Web Gallery: Object Grabbing Mechanic
 
-This document details the implementation of a VR object grabbing mechanic using Three.js for rendering and Cannon-es for physics, focusing on raycaster-based interaction suitable for controllers like those on the Meta Quest.
+This document details the implementation of the VR object grabbing mechanic for the 3D Web Gallery project, using Three.js for rendering and Cannon-es for physics, focusing on raycaster-based interaction suitable for controllers like those on the Meta Quest.
 
 ## Core Concepts
 
@@ -62,16 +62,22 @@ const ladleBody = new CANNON.Body({
 physicsWorld.addBody(ladleBody);
 // --- End Grabbable Object Example ---
 
-// Array to hold references to the top-level THREE.Group/Mesh of grabbable objects
-const grabbableObjects = [ladleGroup];
+// Array holding references to the top-level THREE.Object3D of grabbable objects
+// (In the actual implementation, this is populated dynamically during model loading)
+const visualMeshes: THREE.Object3D[] = [ladleGroup];
 
-// State variables
-let grabbedObject: THREE.Group | null = null; // Currently held Three.js object
-let grabbedBody: CANNON.Body | null = null;   // Currently held Cannon-es body
-let activeController: THREE.Group | null = null; // Controller holding the object
-const controllerLastPosition = new THREE.Vector3(); // For velocity calculation
-const controllerVelocity = new THREE.Vector3();     // Calculated controller velocity
-const clock = new THREE.Clock();                   // For delta time in velocity calc
+// Map to link visual object UUIDs to their physics bodies
+// (Populated during model loading)
+const physicsMap = new Map<string, CANNON.Body>();
+physicsMap.set(ladleGroup.uuid, ladleBody); // Example mapping
+
+// State variables using Maps for multi-controller support
+// Key: Controller (THREE.Group), Value: Grabbed object/body info or state
+const grabbedObjects = new Map<THREE.Group, { object: THREE.Object3D, body: CANNON.Body }>();
+const controllerLastPosition = new Map<THREE.Group, THREE.Vector3>();
+const controllerVelocity = new Map<THREE.Group, THREE.Vector3>();
+
+const clock = new THREE.Clock(); // For delta time in velocity calc
 ```
 
 ## 2. Controller Setup
@@ -124,9 +130,9 @@ function getIntersections(controller: THREE.Group) {
     // Point the ray forward (-Z) in the controller's local space
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    // Check for intersections ONLY with objects in the grabbableObjects array
+    // Check for intersections ONLY with objects in the visualMeshes array
     // The 'true' argument makes the check recursive (checks children of groups)
-    return raycaster.intersectObjects(grabbableObjects, true);
+    return raycaster.intersectObjects(visualMeshes, true);
 }
 ```
 
@@ -135,46 +141,60 @@ function getIntersections(controller: THREE.Group) {
 This function is triggered when the `selectstart` event fires on a controller.
 
 ```typescript
-function onSelectStart(this: THREE.Group) {
-    // 'this' refers to the controller that dispatched the event
-    activeController = this;
-    const intersections = getIntersections(activeController);
+function onSelectStart(this: THREE.Group) { // 'this' refers to the controller
+    const controller = this;
+
+    // Prevent grabbing if controller already holds an object
+    if (grabbedObjects.has(controller)) {
+        return;
+    }
+    // Add check for teleport aiming if needed:
+    // if (controller === controller1 && isTeleportAiming) return;
+
+    const intersections = getIntersections(controller);
 
     if (intersections.length > 0) {
-        // The raycaster might hit a child mesh (e.g., the ladle's handle).
-        // We need to traverse up the scene graph to find the main Group
-        // that is listed in our `grabbableObjects` array.
         let intersectedObject = intersections[0].object;
-        while (intersectedObject.parent && !grabbableObjects.includes(intersectedObject as THREE.Group)) {
-             // Check if the current object itself is the grabbable one before going to parent
-             if (grabbableObjects.includes(intersectedObject as THREE.Group)) break;
-             intersectedObject = intersectedObject.parent;
+
+        // Find the top-level grabbable object and its physics body using physicsMap
+        let targetObject: THREE.Object3D | null = null;
+        let targetBody: CANNON.Body | null = null;
+
+        while (intersectedObject) {
+            targetBody = physicsMap.get(intersectedObject.uuid) ?? null;
+            if (targetBody) {
+                // Find the corresponding visual mesh in our main array
+                targetObject = visualMeshes.find(mesh => mesh.uuid === intersectedObject.uuid || mesh.children.some(child => child.uuid === intersectedObject.uuid)) ?? null;
+                 if (targetObject) break; // Found the body and the top-level visual object
+            }
+            if (!intersectedObject.parent) break;
+            intersectedObject = intersectedObject.parent;
         }
 
-        // Check if the found top-level object is indeed in our list
-        if (grabbableObjects.includes(intersectedObject as THREE.Group)) {
-            grabbedObject = intersectedObject as THREE.Group;
-            // IMPORTANT: Associate the visual object with its physics body.
-            // This example assumes only the ladle is grabbable. For multiple
-            // objects, you'd need a way to map grabbedObject to its body
-            // (e.g., using userData, a Map, or naming conventions).
-            grabbedBody = ladleBody;
+        // Check if another controller is already holding this body
+        let alreadyHeld = false;
+        for (const [, grabbed] of grabbedObjects) { // Iterate through Map values
+            if (grabbed.body === targetBody) {
+                alreadyHeld = true;
+                break;
+            }
+        }
 
-            // --- Physics Integration: Kinematic Switch ---
-            // Make the physics body kinematic. It will now ignore physics forces
-            // (like gravity) and its transform will be manually set based on
-            // the controller's movement in the animate loop.
-            grabbedBody.type = CANNON.Body.KINEMATIC;
-            grabbedBody.velocity.set(0, 0, 0);         // Reset velocity
-            grabbedBody.angularVelocity.set(0, 0, 0); // Reset angular velocity
+        if (targetObject && targetBody && !alreadyHeld) {
+            // Store grabbed state for this controller using Maps
+            grabbedObjects.set(controller, { object: targetObject, body: targetBody });
 
-            // --- Visual Attachment ---
-            // Attach the Three.js object to the controller's Three.js object.
-            // This makes the visual object follow the controller automatically.
-            activeController.attach(grabbedObject);
+            // Physics: Make kinematic
+            targetBody.type = CANNON.Body.KINEMATIC;
+            targetBody.velocity.setZero();
+            targetBody.angularVelocity.setZero();
 
-            // Store controller position for velocity calculation on release
-            controllerLastPosition.copy(activeController.position);
+            // Visual: Attach to controller
+            controller.attach(targetObject);
+
+            // Store initial position for velocity calculation using Maps
+            controllerLastPosition.set(controller, controller.position.clone());
+            controllerVelocity.set(controller, new THREE.Vector3()); // Initialize velocity Map entry
         }
     }
 }
@@ -182,32 +202,33 @@ function onSelectStart(this: THREE.Group) {
 
 ## 5. Dropping/Throwing Logic (`onSelectEnd`)
 
-This function is triggered when the `selectend` event fires.
+This function is triggered when the `selectend` event fires on a controller.
 
 ```typescript
-function onSelectEnd() {
-    // Only proceed if an object is currently grabbed by a controller
-    if (grabbedObject && activeController && grabbedBody) {
+function onSelectEnd(this: THREE.Group) { // 'this' is the controller
+    const controller = this;
+    const grabbed = grabbedObjects.get(controller); // Get state for this controller
+
+    if (grabbed) {
+        const { object: grabbedObject, body: grabbedBody } = grabbed;
 
         // --- Visual Detachment ---
-        // Detach the object from the controller and add it back to the main scene.
-        // Its world transform is preserved during this operation.
-        scene.attach(grabbedObject);
+        scene.attach(grabbedObject); // Preserves world transform
 
         // --- Physics Integration: Dynamic Switch & Velocity ---
-        // Make the physics body dynamic again so it responds to gravity, collisions, etc.
         grabbedBody.type = CANNON.Body.DYNAMIC;
-        grabbedBody.wakeUp(); // Ensure the body is active in the simulation
+        grabbedBody.wakeUp();
 
-        // Apply the calculated controller velocity to the physics body
-        // to simulate throwing the object.
-        grabbedBody.velocity.copy(controllerVelocity as unknown as CANNON.Vec3);
-        // Optional: Could also apply angular velocity if desired
+        // Apply controller velocity for throwing (retrieve from Map)
+        const velocity = controllerVelocity.get(controller);
+        if (velocity) {
+            grabbedBody.velocity.copy(velocity as unknown as CANNON.Vec3);
+        }
 
-        // --- Reset State ---
-        grabbedObject = null;
-        grabbedBody = null;
-        activeController = null;
+        // --- Reset State for this controller ---
+        grabbedObjects.delete(controller);
+        controllerLastPosition.delete(controller);
+        controllerVelocity.delete(controller);
     }
 }
 ```
@@ -224,36 +245,51 @@ function animate() {
     physicsWorld.step(timeStep, deltaTime); // Advance the physics simulation
 
     // --- Sync Physics to Visual (When NOT Grabbed) ---
-    // If the ladle is not currently grabbed, update its visual position
-    // and rotation to match its physics body's state.
-    if (ladleBody && !grabbedObject) {
-        ladleGroup.position.copy(ladleBody.position as unknown as THREE.Vector3);
-        ladleGroup.quaternion.copy(ladleBody.quaternion as unknown as THREE.Quaternion);
+    // Iterate through all physics bodies and their corresponding visual meshes
+    for (let i = 0; i < physicsBodies.length; i++) {
+        const body = physicsBodies[i];
+        const mesh = visualMeshes[i]; // Assumes visualMeshes[i] corresponds to physicsBodies[i]
+
+        // Check if this body is currently held by ANY controller
+        let isHeld = false;
+        for (const [, grabbed] of grabbedObjects) { // Iterate Map values
+            if (grabbed.body === body) {
+                isHeld = true;
+                break;
+            }
+        }
+
+        // Only sync if the body is dynamic/sleeping AND not currently held
+        if (!isHeld && body.type !== CANNON.Body.KINEMATIC) {
+            mesh.position.copy(body.position as unknown as THREE.Vector3);
+            mesh.quaternion.copy(body.quaternion as unknown as THREE.Quaternion);
+        }
     }
 
     // --- Controller Velocity & Kinematic Sync (When Grabbed) ---
-    if (activeController && grabbedObject) {
-        // Calculate controller's velocity since the last frame
-        controllerVelocity.subVectors(activeController.position, controllerLastPosition).divideScalar(deltaTime);
-        controllerLastPosition.copy(activeController.position); // Update last position
+    // Iterate through the controllers that are currently grabbing objects
+    grabbedObjects.forEach((grabbed, controller) => {
+        const { body: grabbedBody } = grabbed;
+        const lastPos = controllerLastPosition.get(controller);
+        const currentVel = controllerVelocity.get(controller);
 
-        // If the grabbed object's physics body is kinematic,
-        // manually update its position and rotation to exactly match the
-        // controller's world transform. This ensures the physics body
-        // follows the controller precisely while grabbed.
-        if (grabbedBody && grabbedBody.type === CANNON.Body.KINEMATIC) {
-            const worldPos = new THREE.Vector3();
-            const worldQuat = new THREE.Quaternion();
-            activeController.getWorldPosition(worldPos);
-            activeController.getWorldQuaternion(worldQuat);
+        if (lastPos && currentVel) {
+            // Calculate velocity for this controller
+            currentVel.copy(controller.position).sub(lastPos).divideScalar(deltaTime);
+            lastPos.copy(controller.position); // Update last position for this controller
 
-            grabbedBody.position.copy(worldPos as unknown as CANNON.Vec3);
-            grabbedBody.quaternion.copy(worldQuat as unknown as CANNON.Quaternion);
+            // Sync kinematic body to controller world transform
+            if (grabbedBody.type === CANNON.Body.KINEMATIC) {
+                const worldPos = new THREE.Vector3();
+                const worldQuat = new THREE.Quaternion();
+                controller.getWorldPosition(worldPos); // Use controller's transform
+                controller.getWorldQuaternion(worldQuat);
+
+                grabbedBody.position.copy(worldPos as unknown as CANNON.Vec3);
+                grabbedBody.quaternion.copy(worldQuat as unknown as CANNON.Quaternion);
+            }
         }
-    } else {
-        // Reset velocity if nothing is grabbed
-        controllerVelocity.set(0, 0, 0);
-    }
+    });
 
     // --- Rendering ---
     renderer.render(scene, camera);
@@ -265,4 +301,4 @@ renderer.setAnimationLoop(animate);
 
 ## Summary
 
-This implementation provides a robust way to handle grabbing, moving, and throwing objects in WebXR using raycasting and integrating with a physics engine like Cannon-es. Key aspects are the state management (`grabbedObject`, `grabbedBody`, `activeController`), the physics body type switching (`KINEMATIC`/`DYNAMIC`), and the synchronization logic within the animation loop. Remember to adapt the object mapping between visual (`THREE.Group`) and physics (`CANNON.Body`) if you have multiple grabbable items.
+This implementation provides a robust way to handle grabbing, moving, and throwing objects independently with two controllers in WebXR, using raycasting and integrating with Cannon-es. Key aspects are the state management using `Map`s keyed by the controller (`grabbedObjects`, `controllerLastPosition`, `controllerVelocity`), the use of a `physicsMap` for efficient object/body lookup, the physics body type switching (`KINEMATIC`/`DYNAMIC`), and the synchronization logic within the animation loop that correctly handles multiple controllers and held objects.

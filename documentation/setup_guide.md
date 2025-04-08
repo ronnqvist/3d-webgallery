@@ -1,10 +1,10 @@
-# WebXR GLB Viewer with Physics Grabbing: Setup Guide
+# 3D Web Gallery: Setup Guide
 
-This document outlines the steps taken to create a WebXR application using Three.js and Cannon-es for viewing GLB models with interactive physics-based grabbing.
+This document outlines the steps taken to create the 3D Web Gallery application using Three.js and Cannon-es for viewing GLB models with interactive physics-based grabbing in WebXR.
 
 ## 1. Project Goal
 
-The aim is to build a WebXR experience where users can enter a virtual space, view 3D models loaded from a local directory (`3d-models/`), and interact with these models by grabbing, moving, and throwing them using VR controllers. The grabbing mechanic follows the principles detailed in `grabbing_mechanic.md`.
+The aim is to build a 3D Web Gallery experience where users can enter a virtual space, view 3D models loaded from a local directory (`public/3d-models/`), and interact with these models by grabbing, moving, and throwing them using VR controllers. The grabbing mechanic follows the principles detailed in `grabbing_mechanic.md`.
 
 ## 2. Prerequisites
 
@@ -19,11 +19,11 @@ We installed the necessary libraries using npm:
 *   **`cannon-es`**: A physics engine for handling collisions, gravity, and forces.
 *   **`vite`**: A fast development server and build tool (installed as a dev dependency).
 
-Installation command:
+Installation command (reflecting actual steps):
 
 ```bash
-npm install three @types/three cannon-es
-npm install --save-dev vite
+npm install three cannon-es
+npm install --save-dev vite typescript @types/three
 ```
 
 ## 4. Project Structure
@@ -34,6 +34,7 @@ The main files and directories involved are:
 *   `src/main.ts`: The primary TypeScript file containing all the application logic.
 *   `src/model-list.json`: A JSON file containing a list of paths to the GLB models to be loaded.
 *   `package.json`: Manages project dependencies and scripts.
+*   `tsconfig.json`: TypeScript configuration for the project.
 *   `vite.config.js`: Configuration file for the Vite development server.
 *   `public/`: Directory for static assets. Vite copies its contents to the build output root.
 *   `public/3d-models/`: Directory containing the actual `.glb` model files.
@@ -73,13 +74,14 @@ This file orchestrates the entire experience:
     *   Stores references to the visual meshes (`THREE.Object3D`) and physics bodies (`CANNON.Body`) in arrays (`visualMeshes`, `physicsBodies`).
     *   Uses a `Map` (`physicsMap`) to link the UUID of a Three.js object to its Cannon-es body for easy lookup during grabbing.
 *   **Grabbing Mechanics (based on `grabbing_mechanic.md`):**
-    *   Raycasting: Sets up a `THREE.Raycaster` originating from the controller's position and pointing forward. `raycaster.far` is set to `Infinity`.
-    *   Dual Hand Support: Uses `Map`s to track grabbed object/body per controller.
-    *   `getIntersections` function: Performs the raycast against grabbable objects.
-    *   `onGrabStart` function (Controller Event): Handles grabbing logic per controller. Prevents grabbing already-held objects. **Specifically for the left (teleport) controller, grabbing is prevented if teleport aiming (squeeze) is active.**
-    *   `onGrabEnd` function (Controller Event): Handles release/throwing logic per controller.
+    *   Raycasting: Sets up a `THREE.Raycaster` originating from the controller's position and pointing forward (`raycaster.far = Infinity`).
+    *   Dual Hand Support: Uses `Map`s (`grabbedObjects`, `controllerLastPosition`, `controllerVelocity`) keyed by the controller object (`THREE.Group`) to track the grabbed object/body state and calculate velocity independently for each hand.
+    *   `getIntersections` function: Performs the raycast against the `visualMeshes` array (recursively checking children).
+    *   Object/Body Lookup: Uses the `physicsMap` (`Map<string, CANNON.Body>`) to find the corresponding `CANNON.Body` for an intersected `THREE.Object3D`'s UUID during `onGrabStart`.
+    *   `onGrabStart` function (Controller Event): Handles grabbing logic per controller. Prevents grabbing if the controller already holds an object or if the target object is held by the *other* controller. **Specifically for the left (teleport) controller, grabbing is prevented if teleport aiming (squeeze) is active.**
+    *   `onGrabEnd` function (Controller Event): Handles release/throwing logic per controller, applying calculated velocity from the `controllerVelocity` map.
 *   **Locomotion:**
-    *   **Desktop:** Implements `PointerLockControls` for mouse look and keyboard listeners (added on pointer lock) for WASD movement. These controls are automatically disabled when entering VR and re-enabled on exit.
+    *   **Desktop:** Implements `PointerLockControls` for mouse look. Keyboard listeners (`keydown`/`keyup`) for WASD movement are added permanently. The event handlers (`onKeyDown`, `onKeyUp`) check `pointerLockControls.isLocked` internally before applying movement. The click listener to initiate pointer lock is disabled when entering VR and re-enabled on exit.
     *   **VR Teleportation:**
         *   Uses the left controller (`controller1`) for aiming.
         *   Shows a target marker (`RingGeometry`) on the ground when the `squeeze` button is held.
@@ -93,18 +95,18 @@ This file orchestrates the entire experience:
     *   Attaches `selectstart` (trigger) for teleport confirmation to the left controller (conditional logic within handlers prevents conflict with grabbing).
 *   **Animation Loop (`animate` function):**
     *   Steps the `physicsWorld`.
-    *   **Physics Synchronization:** Iterates through `physicsBodies` and `visualMeshes`. If a visual mesh is *not* currently grabbed, its position and quaternion are updated to match its corresponding physics body.
-    *   **Kinematic Synchronization:** If an object *is* currently grabbed (`grabbedObject` is not null) and its body is `KINEMATIC`, the physics body's position and quaternion are manually updated to match the world transform of the `activeController`. This ensures the physics representation follows the controller exactly.
-    *   **Velocity Calculation:** Calculates the controller's velocity between frames when an object is held.
+    *   **Physics Synchronization:** Iterates through `physicsBodies` and `visualMeshes`. If a visual mesh's corresponding physics body is *not* currently held (checked by iterating through `grabbedObjects`), its position and quaternion are updated to match its physics body.
+    *   **Kinematic Synchronization:** Iterates through the `grabbedObjects` map. For each held object whose body is `KINEMATIC`, the physics body's position and quaternion are manually updated to match the world transform of the *controller* holding it.
+    *   **Velocity Calculation:** Iterates through the `grabbedObjects` map, calculating each controller's velocity between frames using the `controllerLastPosition` map and storing it in the `controllerVelocity` map.
     *   Renders the `scene` using the `camera`.
 
 ## 7. Vite Configuration (`vite.config.js`)
 
 A `vite.config.js` file was created to configure the Vite development server:
 
-*   `server.host: true`: Allows Vite to listen on all network interfaces, making it accessible from other devices on the network (and via tunneling services like ngrok).
-*   `server.hmr.clientPort: 443`: Helps Hot Module Replacement (HMR) work correctly when accessed via HTTPS tunnels (like default ngrok).
-*   `server.allowedHosts`: An array explicitly listing hostnames allowed to access the dev server. This was necessary to allow access from the specific `ngrok-free.app` URL being used.
+*   `server.host: true`: Allows Vite to listen on all network interfaces.
+*   `server.hmr.clientPort: 443`: Helps Hot Module Replacement (HMR) work correctly when accessed via HTTPS tunnels.
+*   `server.allowedHosts: ['.ngrok-free.app']`: Allows access from any host ending in `.ngrok-free.app`, specifically configured to work easily with ngrok tunnels during development.
 
 ## 8. Running the Project (Development)
 
@@ -136,4 +138,4 @@ The development server (`npm run dev`) is great for coding, but for deployment t
 3.  Add the relative path (starting with `3d-models/`, e.g., `3d-models/your-model.glb`) for each model you want to load into the JSON array.
 4.  Restart the Vite development server (`npm run dev`) for the changes to take effect.
 
-The application (`src/main.ts`) will automatically read this JSON file and attempt to load, position, and create physics bodies for each listed model. 
+The application (`src/main.ts`) will automatically read this JSON file and attempt to load, position, and create physics bodies for each listed model.

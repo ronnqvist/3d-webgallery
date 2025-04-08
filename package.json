@@ -1,7 +1,7 @@
 {
-  "name": "3d-webgallery",
+  "name": "3d-web-gallery",
   "version": "1.0.0",
-  "description": "This project is a simple WebXR application that allows users to view and interact with 3D models (`.glb` files) in a virtual reality environment. It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server.",
+  "description": "A 3D Web Gallery application allowing users to view and interact with GLB models in WebXR using Three.js, Cannon-es, and Vite.",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "cannon-es": "^0.20.0",
