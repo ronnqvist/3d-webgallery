@@ -290,8 +290,9 @@ const moveSpeed = 5; // meters per second
 function onKeyDown(event: KeyboardEvent) {
     if (!pointerLockControls.isLocked) return;
     switch (event.code) {
-        case 'KeyW': case 'ArrowUp': moveState.forward = 1; break;
-        case 'KeyS': case 'ArrowDown': moveState.backward = 1; break;
+        // Inverted W/S and Up/Down
+        case 'KeyW': case 'ArrowUp': moveState.backward = 1; break;
+        case 'KeyS': case 'ArrowDown': moveState.forward = 1; break;
         case 'KeyA': case 'ArrowLeft': moveState.left = 1; break;
         case 'KeyD': case 'ArrowRight': moveState.right = 1; break;
     }
@@ -301,8 +302,9 @@ function onKeyDown(event: KeyboardEvent) {
 function onKeyUp(event: KeyboardEvent) {
     if (!pointerLockControls.isLocked) return;
     switch (event.code) {
-        case 'KeyW': case 'ArrowUp': moveState.forward = 0; break;
-        case 'KeyS': case 'ArrowDown': moveState.backward = 0; break;
+        // Inverted W/S and Up/Down
+        case 'KeyW': case 'ArrowUp': moveState.backward = 0; break;
+        case 'KeyS': case 'ArrowDown': moveState.forward = 0; break;
         case 'KeyA': case 'ArrowLeft': moveState.left = 0; break;
         case 'KeyD': case 'ArrowRight': moveState.right = 0; break;
     }
