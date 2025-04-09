@@ -81,3 +81,4 @@ web_modules/
 
 # Ignore the 3D model list file, since it is generated
 src/3d-model-list.json
+src/3d-model-list.json
