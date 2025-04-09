@@ -83,7 +83,7 @@ scene.add(controllerGrip2);
 const loader = new GLTFLoader();
 const visualMeshes: THREE.Object3D[] = []; // Array for visual models (top-level groups)
 const physicsBodies: CANNON.Body[] = [];   // Array for corresponding physics bodies
-const initialTransforms: { position: CANNON.Vec3, quaternion: CANNON.Quaternion }[] = []; // Store initial state
+// Removed initialTransforms array as reset will be randomized
 const physicsMap = new Map<string, CANNON.Body>(); // Map THREE object UUID -> CANNON Body
 
 const modelSpacing = 1.5;
@@ -140,11 +140,7 @@ modelPaths.forEach((relativePath, index) => {
 
             physicsWorld.addBody(body);
             physicsBodies.push(body);
-            // Store initial transform for resetting
-            initialTransforms.push({
-                position: body.position.clone(),
-                quaternion: body.quaternion.clone()
-            });
+            // Removed storing initial transform
 
             // Map the main model object's UUID to the physics body
             physicsMap.set(model.uuid, body);
@@ -431,17 +427,31 @@ function onTeleportSelect() { // Select Start (Trigger - Left Controller)
 
 // --- Reset Function ---
 function resetObjects() {
-    console.log("Resetting object positions...");
-    physicsBodies.forEach((body, index) => {
-        if (initialTransforms[index]) {
-            const { position, quaternion } = initialTransforms[index];
-            body.position.copy(position);
-            body.quaternion.copy(quaternion);
-            body.velocity.setZero();
-            body.angularVelocity.setZero();
-            body.wakeUp(); // Ensure physics engine updates the body state
-        }
+    console.log("Randomizing object positions...");
+    const spawnArea = { x: 6, z: 4 }; // Width and depth of spawn area
+    const centerOffset = { x: 0, z: -2 }; // Center the area slightly back
+
+    physicsBodies.forEach((body) => {
+        // Calculate random position within the spawn area
+        const randomX = (Math.random() - 0.5) * spawnArea.x + centerOffset.x;
+        const randomZ = (Math.random() - 0.5) * spawnArea.z + centerOffset.z;
+        const randomY = 1.0 + Math.random(); // Spawn between 1.0 and 2.0 units high
+
+        body.position.set(randomX, randomY, randomZ);
+
+        // Apply random rotation
+        body.quaternion.setFromEuler(
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2
+        );
+
+        // Reset velocities
+        body.velocity.setZero();
+        body.angularVelocity.setZero();
+        body.wakeUp(); // Ensure physics engine updates the body state
     });
+
     // Also clear any grabbed objects state
     grabbedObjects.forEach((grabbed, controller) => {
          scene.attach(grabbed.object); // Detach from controller
