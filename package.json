@@ -1,5 +1,5 @@
 {
-  "name": "3d-web-gallery",
+  "name": "3d-webgallery",
   "version": "1.0.0",
   "description": "A 3D Web Gallery application allowing users to view and interact with GLB models in WebXR using Three.js, Cannon-es, and Vite.",
   "main": "index.js",
