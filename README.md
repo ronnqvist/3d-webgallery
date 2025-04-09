@@ -44,6 +44,7 @@ Users can enter a VR space, see models loaded from a specified list, point at th
     *   Left Controller Squeeze: Hold to show teleport target marker.
     *   Left Controller Trigger (while squeezing and marker is green): Teleport to the marker location.
     *   Release Right Trigger: Throw held object.
+    *   Right Controller Squeeze: Reset all objects to their initial positions.
 
 ## Building for Production (Static Hosting)
 

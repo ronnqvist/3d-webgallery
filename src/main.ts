@@ -83,6 +83,7 @@ scene.add(controllerGrip2);
 const loader = new GLTFLoader();
 const visualMeshes: THREE.Object3D[] = []; // Array for visual models (top-level groups)
 const physicsBodies: CANNON.Body[] = [];   // Array for corresponding physics bodies
+const initialTransforms: { position: CANNON.Vec3, quaternion: CANNON.Quaternion }[] = []; // Store initial state
 const physicsMap = new Map<string, CANNON.Body>(); // Map THREE object UUID -> CANNON Body
 
 const modelSpacing = 1.5;
@@ -139,6 +140,11 @@ modelPaths.forEach((relativePath, index) => {
 
             physicsWorld.addBody(body);
             physicsBodies.push(body);
+            // Store initial transform for resetting
+            initialTransforms.push({
+                position: body.position.clone(),
+                quaternion: body.quaternion.clone()
+            });
 
             // Map the main model object's UUID to the physics body
             physicsMap.set(model.uuid, body);
@@ -423,6 +429,29 @@ function onTeleportSelect() { // Select Start (Trigger - Left Controller)
     // Grabbing logic is handled separately in onGrabStart, which checks isTeleportAiming.
 }
 
+// --- Reset Function ---
+function resetObjects() {
+    console.log("Resetting object positions...");
+    physicsBodies.forEach((body, index) => {
+        if (initialTransforms[index]) {
+            const { position, quaternion } = initialTransforms[index];
+            body.position.copy(position);
+            body.quaternion.copy(quaternion);
+            body.velocity.setZero();
+            body.angularVelocity.setZero();
+            body.wakeUp(); // Ensure physics engine updates the body state
+        }
+    });
+    // Also clear any grabbed objects state
+    grabbedObjects.forEach((grabbed, controller) => {
+         scene.attach(grabbed.object); // Detach from controller
+         grabbed.body.type = CANNON.Body.DYNAMIC; // Ensure it's dynamic
+    });
+    grabbedObjects.clear();
+    controllerLastPosition.clear();
+    controllerVelocity.clear();
+}
+
 
 // --- Event Listener Setup ---
 function setupControllerListeners() {
@@ -438,6 +467,9 @@ function setupControllerListeners() {
 
     // Teleport Confirmation (Left Controller Trigger)
     controller1.addEventListener('selectstart', onTeleportSelect); // Add listener
+
+    // Reset Objects (Right Controller Squeeze)
+    controller2.addEventListener('squeezestart', resetObjects);
 }
 
 function removeControllerListeners() {
@@ -449,6 +481,9 @@ function removeControllerListeners() {
     controller1.removeEventListener('squeezestart', onTeleportAimStart);
     controller1.removeEventListener('squeezeend', onTeleportAimEnd);
     controller1.removeEventListener('selectstart', onTeleportSelect);
+
+    // Reset Objects
+    controller2.removeEventListener('squeezestart', resetObjects);
 }
 
 renderer.xr.addEventListener('sessionstart', () => {
