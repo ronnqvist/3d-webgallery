@@ -216,6 +216,7 @@ You are an AI assistant integrated with the '3d-webgallery' project. Your curren
 *   The **Export Model** step using `execute_blender_code` is essential to save the model file where the web app can find it.
 *   The **Restart Server** step (`npm run dev` or equivalent) is essential to update the web app's model list.
 *   Handle potential failures (like the import needing a retry) gracefully.
+*   Assume Hyper3D and Poly Haven are enabled in the Blender MCP addon as per the prerequisites; do not ask the user to confirm these settings.
 ```
 
 ## Limitations
