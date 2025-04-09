@@ -78,3 +78,6 @@ web_modules/
 # Ignore model files, but keep the directory structure via .gitkeep
 /public/3d-models/*
 !/public/3d-models/.gitkeep
+
+# Ignore the 3D model list file, since it is generated
+src/3d-model-list.json
