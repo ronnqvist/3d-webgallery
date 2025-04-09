@@ -3,16 +3,17 @@ import path from 'path';
 
 const modelsDir = path.join('public', '3d-models');
 const outputFile = path.join('src', '3d-model-list.json');
-const prefix = '3d-models/'; // Prefix to add to each filename in the JSON
+const deploymentBasePath = '/3d-webgallery/'; // Base path for GitHub Pages
+const modelSubDir = '3d-models/';
 
 try {
   // Read the contents of the models directory
   const files = fs.readdirSync(modelsDir);
 
-  // Filter for .glb files and format them for the JSON output
+  // Filter for .glb files and format them with the full deployment path
   const glbFiles = files
     .filter(file => path.extname(file).toLowerCase() === '.glb')
-    .map(file => `${prefix}${file}`); // Add the prefix
+    .map(file => `${deploymentBasePath}${modelSubDir}${file}`); // Prepend base path
 
   // Create the JSON string
   const jsonContent = JSON.stringify(glbFiles, null, 2); // Pretty print JSON
