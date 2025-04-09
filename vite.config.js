@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/3d-webgallery/', // Set base path for GitHub Pages deployment
   server: {
     host: true, // Listen on all network interfaces
     hmr: {
