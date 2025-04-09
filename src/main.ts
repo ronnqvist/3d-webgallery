@@ -91,9 +91,10 @@ let currentX = -((modelsPerRow - 1) * modelSpacing) / 2;
 let currentZ = -2;
 let modelsInRow = 0;
 
-modelPaths.forEach((path, index) => {
+// Load paths directly from JSON - browser should resolve relative paths correctly
+modelPaths.forEach((relativePath, index) => {
     loader.load(
-        path,
+        relativePath, // Use the path directly from the JSON
         (gltf) => {
             const model = gltf.scene;
             model.castShadow = true;
@@ -160,7 +161,8 @@ modelPaths.forEach((path, index) => {
         },
         undefined, // Progress callback (optional)
         (error) => {
-            console.error(`Error loading model ${path}:`, error);
+            // Log the path that failed
+            console.error(`Error loading model ${relativePath}:`, error);
         }
     );
 });
