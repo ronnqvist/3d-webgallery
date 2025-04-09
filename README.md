@@ -41,7 +41,9 @@ This project utilizes the following key technologies:
 3.  **Access:** Open the URL provided by Vite (e.g., `http://localhost:5173` or your ngrok/tunnel URL) in a WebXR-compatible browser (like Meta Quest Browser).
 4.  **Enter VR:** Click the "Enter VR" button displayed on the page.
 
-**Note on Vite Configuration:** The `vite.config.js` file is configured with `allowedHosts: ['.ngrok-free.app']` to allow access via ngrok tunnels during development. You may need to adjust this setting if accessing the development server directly or using a different tunneling service.
+**Note on Vite Configuration:**
+*   The `vite.config.js` file is configured with `allowedHosts: ['.ngrok-free.app']` to allow access via ngrok tunnels during development. You may need to adjust this setting if accessing the development server directly or using a different tunneling service.
+*   Cache-disabling headers are set for the development server (`server.headers` in `vite.config.js`) to help ensure that browser refreshes (especially in VR) load the latest code and assets.
 
 ## Controls
 

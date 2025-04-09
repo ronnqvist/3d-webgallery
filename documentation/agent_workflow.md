@@ -163,7 +163,7 @@ This workflow enables an AI agent to seamlessly integrate AI-generated 3D models
 8.  **Inform User & Celebrate!** 🎉
     *   Notify the user that the model (`<new_model_name>.glb`) has been generated, exported, and added to the project.
     *   Confirm that the development server has been restarted (or started).
-    *   Instruct the user to **refresh their VR browser tab** connected to the development server URL. Their newly prompted creation should now be visible in the gallery!
+    *   Instruct the user to **refresh their VR browser tab** connected to the development server URL. Their newly prompted creation should now be visible in the gallery! (Note: The Vite dev server is configured with cache-disabling headers in `vite.config.js` to help ensure the refresh loads the latest assets).
 
 ## Using the Custom Roo Code Mode (`.roomodes`)
 
