@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/3d-webgallery/', // Set base path for GitHub Pages deployment
+  base: './', // Use relative base path for asset linking
   server: {
     host: true, // Listen on all network interfaces
     hmr: {
