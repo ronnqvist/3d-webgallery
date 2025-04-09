@@ -1,62 +1,33 @@
-# Scene Management Plan
+# Scene Layout Plan (Static Build Focus)
 
-This document outlines the plan for implementing scene saving and loading functionality within the 3D Web Gallery project, starting with a simple client-side solution and outlining future backend possibilities.
+This document outlines the plan for defining and applying a specific scene layout (object positions and orientations) for the 3D Web Gallery project, intended for static deployment. This approach focuses on setting the layout during local development and "baking" it into the production build.
 
-## 1. Introduction & Goals
+## 1. Introduction & Goal
 
-### Overall Vision
-The long-term vision is to transform the gallery into a customizable VR space where users can:
-*   Select which 3D models they want to include in their scene.
-*   Arrange these models freely within the VR environment.
-*   Define properties for objects (e.g., static vs. dynamic).
-*   Save their customized scene layout persistently.
-*   Load previously saved scenes.
-*   Potentially share scenes with others.
-*   Enable a streamlined workflow for AI agents to add new models directly to the available pool without requiring manual project updates or server restarts.
+### Revised Goal
+Enable users to arrange objects within the VR gallery *during local development* (`npm run dev`), capture this specific layout into a project file, and then generate a static build (`npm run build`) where objects consistently load in those pre-defined positions and orientations. The deployed static site will always show this "baked-in" layout, simplifying the deployed application by removing runtime save/load features.
 
-### Phase 1 Goal (Current Scope)
-Implement basic scene persistence using **Browser Local Storage**. This phase focuses on allowing a user to save and reload the **positions and orientations** of the models currently loaded from the `public/3d-models/` directory. This provides a simple way to retain a custom arrangement within a single browser.
+### Relation to Agent Workflow
+This layout process is separate from the AI agent workflow (`documentation/agent_workflow.md`) used to add *new* models to the `public/3d-models/` directory. After an agent adds a model, the typical process would be:
+1. Run `npm run dev`.
+2. Enter VR and arrange the scene, including the new model.
+3. Use the "Save Layout to Build File" feature (described below).
+4. Run `npm run build` to create the deployable static site with the new layout.
 
-### Future Vision (Out of Scope for Phase 1)
-Future phases could introduce:
-*   A web UI for selecting models before entering VR.
-*   Object properties (e.g., `isStatic` flag to disable grabbing/physics, potentially linked to an "Edit Mode").
-*   A backend system (database or MCP server) for persistent, shareable scenes and user accounts.
-*   Integration with the agent workflow (`agent_workflow.md`) via a backend endpoint, allowing agents to add models dynamically without needing project file access or server restarts.
+## 2. Local Development & Layout Workflow
 
-## 2. Phase 1 Implementation Plan (Local Storage)
+### Arrangement
+1.  **Start Dev Server:** Run `npm run dev`.
+2.  **Enter VR:** Access the gallery via the development URL.
+3.  **Position Objects:** Use VR controllers to grab and arrange the models loaded from `public/3d-models/` into the desired final layout.
 
-This phase focuses on saving/loading the transform (position and orientation) of existing models loaded from `src/3d-model-list.json`.
-
-### Data Structure (Local Storage)
-A JSON object will be stored in `localStorage` under a key like `webGallerySceneLayout`.
-
-*   **Key:** `webGallerySceneLayout`
-*   **Value (JSON String):**
-    ```json
-    {
-      "sceneLayout": {
-        "<model_path_1>": {
-          "position": { "x": number, "y": number, "z": number },
-          "quaternion": { "x": number, "y": number, "z": number, "w": number }
-        },
-        "<model_path_2>": {
-          "position": { "x": number, "y": number, "z": number },
-          "quaternion": { "x": number, "y": number, "z": number, "w": number }
-        }
-        // ... etc for all models currently in the scene
-      }
-    }
-    ```
-    *   `<model_path>` will be the unique identifier for the model, likely its relative path loaded from `src/3d-model-list.json` (e.g., `public/3d-models/sauna-ladle-gemini.glb`). This identifier needs to be reliably associated with the `THREE.Object3D` (mesh) and `CANNON.Body` during the initial model loading process.
-
-### Save Logic
-1.  **Trigger:** Add a "Save Layout" button or interaction accessible within the VR experience (e.g., attached to a controller or a static UI element).
+### Capture Layout ("Save Layout to Build File")
+1.  **Trigger:** Implement a "Save Layout to Build File" button or interaction accessible only within the VR experience *during development* (e.g., attached to a controller menu, perhaps only visible if `import.meta.env.DEV` is true).
 2.  **Data Collection:** When triggered:
     *   Create an empty object, e.g., `layoutData = {}`.
-    *   Iterate through the `visualMeshes` array (or use the `physicsMap` keys/values). **Crucially, ensure you can retrieve the original model path associated with each mesh/body.** This might involve storing the path in the `userData` of the mesh or using a reverse lookup map during the initial loading.
-    *   Get the current world `position` (Vector3) and `quaternion` (Quaternion) of the `THREE.Object3D` (visual mesh).
-    *   Store this data in the `layoutData` object:
+    *   Iterate through the `visualMeshes` array (or use `physicsMap`). Ensure you can retrieve the original model path associated with each mesh/body (e.g., from `mesh.userData.filePath` set during loading).
+    *   Get the current world `position` (Vector3) and `quaternion` (Quaternion) of each `THREE.Object3D` (visual mesh).
+    *   Store this data:
         ```javascript
         // Assuming 'modelPath' is retrieved for the current 'mesh'
         layoutData[modelPath] = {
@@ -64,70 +35,57 @@ A JSON object will be stored in `localStorage` under a key like `webGalleryScene
           quaternion: { x: mesh.quaternion.x, y: mesh.quaternion.y, z: mesh.quaternion.z, w: mesh.quaternion.w }
         };
         ```
-3.  **Storage:** Convert the `layoutData` object into a JSON string and save it:
-    ```javascript
-    const sceneData = { sceneLayout: layoutData };
-    localStorage.setItem('webGallerySceneLayout', JSON.stringify(sceneData));
-    ```
-4.  **Feedback:** Provide visual/audio feedback to the user confirming the save.
+3.  **File Saving:**
+    *   Format the collected data into the final JSON structure:
+        ```javascript
+        const sceneLayoutFileContent = JSON.stringify({ sceneLayout: layoutData }, null, 2); // Pretty-print JSON
+        ```
+    *   **Mechanism:** Provide a way to save this `sceneLayoutFileContent` string to `src/scene-layout.json`. Options:
+        *   **Agent Interaction:** If using an agent with write permissions (like Roo Code in 'Code' mode), the agent can use the `write_to_file` tool with the path `src/scene-layout.json` and the generated JSON string. The VR button might trigger a console log of the JSON string for the agent to copy.
+        *   **Manual User Action:** Log the `sceneLayoutFileContent` string to the browser's developer console. Instruct the user (via console log or VR feedback) to copy this string and manually paste it into a file named `src/scene-layout.json` in their project.
+4.  **Feedback:** Provide confirmation that the layout data has been generated (and logged/sent to agent).
 
-### Load Logic
-1.  **Trigger:** This should happen automatically during application initialization in `src/main.ts`, specifically *after* the default models have been loaded from `src/3d-model-list.json` and positioned initially, but *before* the animation loop potentially modifies them further.
-2.  **Data Retrieval:**
-    ```javascript
-    const savedDataString = localStorage.getItem('webGallerySceneLayout');
-    if (savedDataString) {
-      try {
-        const savedData = JSON.parse(savedDataString);
-        const savedLayout = savedData.sceneLayout;
-        // Proceed to apply layout...
-      } catch (e) {
-        console.error("Error parsing saved scene layout:", e);
-      }
+### Loading the Layout (Dev & Prod)
+1.  **Modify `src/main.ts`:** Update the initialization logic.
+2.  **Import Layout Data:** Attempt to import the layout file. Vite handles JSON imports directly.
+    ```typescript
+    import sceneLayoutData from '../src/scene-layout.json?raw'; // Import as raw string initially
+    let savedLayout = null;
+    if (sceneLayoutData) {
+        try {
+            savedLayout = JSON.parse(sceneLayoutData).sceneLayout;
+        } catch (e) {
+            console.warn("Could not parse src/scene-layout.json:", e);
+        }
     }
     ```
-3.  **Applying Layout:**
-    *   Iterate through the loaded `visualMeshes` (or use `physicsMap`).
-    *   For each `mesh`, retrieve its associated model path identifier.
-    *   Look up this path in the `savedLayout` object.
-    *   If an entry exists (`savedLayout[modelPath]`):
-        *   Get the corresponding physics `body` using the `physicsMap`.
-        *   Apply the saved position and quaternion:
-            ```javascript
-            const savedTransform = savedLayout[modelPath];
-            // Apply to visual mesh
-            mesh.position.set(savedTransform.position.x, savedTransform.position.y, savedTransform.position.z);
-            mesh.quaternion.set(savedTransform.quaternion.x, savedTransform.quaternion.y, savedTransform.quaternion.z, savedTransform.quaternion.w);
+    *Alternatively, if direct JSON import works reliably with Vite's build:*
+    ```typescript
+    // import sceneLayoutFromFile from '../src/scene-layout.json'; // Might need "?json" or assertion
+    // const savedLayout = sceneLayoutFromFile?.sceneLayout;
+    ```
+3.  **Apply Layout:** *After* the initial model loading loop (where models are placed based on `src/3d-model-list.json`):
+    *   If `savedLayout` exists:
+        *   Iterate through the loaded `visualMeshes` (or `physicsMap`).
+        *   Retrieve the `modelPath` for each mesh.
+        *   If `savedLayout[modelPath]` exists:
+            *   Get the physics `body`.
+            *   Apply the saved `position` and `quaternion` to both the `mesh` and the `body`.
+            *   Reset physics velocities and call `body.wakeUp()`.
+    *   If `savedLayout` does *not* exist, the default initial positions are used.
 
-            // Apply to physics body
-            if (body) {
-              body.position.set(savedTransform.position.x, savedTransform.position.y, savedTransform.position.z);
-              body.quaternion.set(savedTransform.quaternion.x, savedTransform.quaternion.y, savedTransform.quaternion.z, savedTransform.quaternion.w);
-              // IMPORTANT: Reset velocities and wake up the body
-              body.velocity.setZero();
-              body.angularVelocity.setZero();
-              body.wakeUp(); // Ensures physics engine recognizes the change
-            }
-            ```
+## 3. Production Build Workflow
 
-### UI Elements
-*   Add VR-interactive elements (e.g., simple buttons attached to a controller menu or placed statically in the scene) for:
-    *   "Save Layout"
-    *   (Optional) "Load Last Saved Layout" (if automatic loading isn't desired)
-    *   (Optional) "Reset Layout" (to revert to default positions)
+1.  **Save Layout:** Perform the "Capture Layout" steps during a local development session to create/update `src/scene-layout.json`.
+2.  **Build:** Run `npm run build`.
+3.  **Vite Bundling:** Vite will process the `import` statement for `src/scene-layout.json` in `src/main.ts`. The JSON data will be included directly within the bundled production JavaScript file(s) in the `dist` directory.
+4.  **Deploy:** Deploy the contents of the `dist` directory. The deployed static site will now automatically load models into the positions defined in the baked-in layout data.
 
-## 3. Future Considerations (Brief Outline)
-
-*   **Backend Storage:** For persistent, shareable scenes, a backend is needed. Options include:
-    *   **File-Based:** Simple Node.js server saving/loading scene JSON files.
-    *   **Database:** More robust (e.g., MongoDB storing scene documents).
-    *   **MCP Server (`scene-mcp`):** Ideal for agent interaction. Provides tools (`saveScene`, `loadScene`, `listScenes`, `listAvailableModels`, `addModel`) and encapsulates storage.
-*   **Agent Workflow Integration:** A backend `addModel` endpoint/tool would allow agents using `blender-mcp` to add models dynamically without needing project file access or server restarts, simplifying the process in `agent_workflow.md`. The frontend would fetch the model list from the backend/MCP instead of `src/3d-model-list.json`.
-*   **Advanced Features:** A backend enables user accounts, scene sharing, a web UI for model selection before entering VR, and defining object properties (`isStatic`, interaction types) stored within the scene data.
-
-## 4. Phase 1 Implementation Notes
+## 4. Implementation Details & Considerations
 
 *   **File:** Modifications primarily target `src/main.ts`.
-*   **Model Identification:** Ensure a reliable way to link loaded meshes/bodies back to their original file paths from `src/3d-model-list.json` (e.g., using `mesh.userData.filePath`).
-*   **Physics Update:** Remember to update *both* the Three.js mesh and the Cannon-es body transforms and call `body.wakeUp()` when loading a layout.
-*   **Timing:** Apply the loaded layout after initial model placement but before the user can interact significantly.
+*   **Model Identification:** A robust method is needed to link loaded meshes/bodies back to their file paths (e.g., `mesh.userData.filePath = modelPath` during loading).
+*   **Physics Update:** Crucial to update both mesh and body transforms and call `body.wakeUp()`.
+*   **Save Mechanism Choice:** Decide between agent-based saving (requires write mode) or manual user copy-paste. The manual method is simpler and doesn't require mode switching.
+*   **Development-Only UI:** The "Save Layout" button should ideally only be added/visible when `import.meta.env.DEV` is true.
+*   **.gitignore:** Add `src/scene-layout.json` to `.gitignore` if layouts are considered user-specific and not part of the core repository state. *Alternatively*, commit a default `scene-layout.json` if desired. (Decision needed).
