@@ -93,16 +93,16 @@ This workflow enables an AI agent to seamlessly integrate AI-generated 3D models
     *   The script must:
         *   Select the object imported in the previous step (using the `name` provided, e.g., "vintage_radio").
         *   Call Blender's GLTF exporter (`bpy.ops.export_scene.gltf`).
-        *   Specify the **absolute `filepath`** pointing to the `public/3d-models/` directory within the project, using the desired filename (e.g., `c:/Users/simon/projects/webxr/3d-webgallery/public/3d-models/vintage_radio.glb`). **Crucially, testing shows Blender requires an absolute path here to avoid permission errors.**
+        *   Specify the **absolute `filepath`** pointing to the `public/3d-models/` directory within the project, using the desired filename (e.g., `<PROJECT_ROOT>/public/3d-models/vintage_radio.glb`). **Crucially, testing shows Blender requires an absolute path here to avoid permission errors.** The agent must construct this absolute path.
         *   Set `export_format='GLB'` and `use_selection=True`.
-    *   *Example Python Script (pass as string in `code` argument - Ensure `export_dir` is an absolute path):*
+    *   *Example Python Script (pass as string in `code` argument - Agent must construct the absolute `export_dir` path dynamically):*
         ```python
         import bpy
         import os
 
-        # --- Parameters (Agent must ensure export_dir is an absolute path) ---
+        # --- Parameters (Agent must construct absolute export_dir path dynamically) ---
         object_name = "vintage_radio" # The name given during import_generated_asset
-        export_dir = "c:/Users/simon/projects/webxr/3d-webgallery/public/3d-models/" # MUST be an absolute path to the target directory
+        export_dir = "<ABSOLUTE_PATH_TO_PROJECT>/public/3d-models/" # Agent constructs this based on CWD + relative path
         export_filename = object_name + ".glb"
         # --- End Parameters ---
 
@@ -205,7 +205,7 @@ You are an AI assistant integrated with the '3d-webgallery' project. Your curren
 5.  **Import Model:** Use `import_generated_asset` with stored `task_uuid`/`request_id` and give the object a unique name (e.g., based on the prompt). Retry once if it fails initially.
 6.  **Export Model:** CRITICAL - Use `execute_blender_code`. Before calling the tool, construct the Python script string:
     *   Start with the provided Python script template.
-    *   **Set `export_dir` to the ABSOLUTE path** to the `public/3d-models` directory within this project (e.g., `c:/Users/simon/projects/webxr/3d-webgallery/public/3d-models/`). Relative paths will likely cause permission errors in Blender.
+    *   **Dynamically construct the ABSOLUTE path** for the `export_dir` variable by joining your current working directory (project root) with `public/3d-models/`. (e.g., `<PROJECT_ROOT>/public/3d-models/`). Relative paths will likely cause permission errors in Blender.
     *   Set the `object_name` variable in the script to the unique name used in the import step.
     *   Set the `export_filename` variable (e.g., `object_name + ".glb"`).
     *   Pass the complete, updated Python script string as the `code` argument to `execute_blender_code`.

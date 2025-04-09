@@ -17,3 +17,14 @@
 2.  **Review Configurations:** Check relevant configuration files (e.g., `.roomodes`, `package.json`, `vite.config.js`) for necessary updates.
 3.  **Update:** Make the required changes to documentation and configuration files to ensure they accurately represent the current state of the project and workflow.
 4.  **Rationale:** Maintaining consistency between code, workflow, documentation, and configuration is crucial for usability, onboarding new contributors (human or AI), and preventing errors caused by outdated information.
+
+---
+
+## Rule: Avoid Absolute Paths and Environment-Specific Info
+
+**Trigger:** Before committing any file changes, especially to documentation, configuration files (`.roomodes`, `package.json`, etc.), or example code snippets.
+
+**Action:**
+1.  **Review Changes:** Carefully check the diff for any hardcoded absolute file paths (e.g., `c:/Users/...`, `/home/...`), local network addresses, API keys, or other information specific to the current development environment.
+2.  **Generalize/Remove:** Replace absolute paths with relative paths (if appropriate for the context) or use placeholders like `<PROJECT_ROOT>`, `<YOUR_API_KEY>`, `<LOCAL_IP>`. Add instructions explaining how the user or agent should determine the correct value dynamically (e.g., based on current working directory, environment variables). Remove sensitive information entirely.
+3.  **Rationale:** Ensures code and documentation are portable, secure, and do not expose potentially sensitive details about the development environment. Placeholders guide users/agents on how to configure things correctly for their own setup.
