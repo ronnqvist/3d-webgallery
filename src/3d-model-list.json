@@ -1,13 +1,15 @@
 [
-  "3d-models/Sauna-Claude.glb",
-  "3d-models/Sauna-Claude2.glb",
+  "3d-models/monkey.glb",
   "3d-models/sauna-bocket-deepseek.glb",
   "3d-models/sauna-bucket-grok.glb",
+  "3d-models/Sauna-Claude.glb",
+  "3d-models/Sauna-Claude2.glb",
   "3d-models/sauna-ladle-claude-hyper3d.glb",
   "3d-models/sauna-ladle-deepseek-refined.glb",
   "3d-models/sauna-ladle-deepseek.glb",
   "3d-models/sauna-ladle-deepseek2.glb",
   "3d-models/sauna-ladle-gemini-hyper3d.glb",
   "3d-models/sauna-ladle-gemini.glb",
-  "3d-models/sauna-ladle-gemini2.glb"
+  "3d-models/sauna-ladle-gemini2.glb",
+  "3d-models/small_red_cube.glb"
 ]

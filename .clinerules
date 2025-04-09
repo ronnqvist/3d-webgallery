@@ -1,0 +1,19 @@
+# Cline Rules for 3d-webgallery Project
+
+## General Guideline: Stay Updated on Documentation
+
+**Context:** Workflows, configurations, and code evolve. Staying informed is key.
+
+**Action:** At the beginning of each new or resumed chat session, review the contents of the `documentation/` directory (especially `agent_workflow.md`, `setup_guide.md`, `grabbing_mechanic.md`) to ensure you are operating with the latest procedures and project context.
+
+---
+
+## Rule: Keep Documentation and Configuration Synchronized
+
+**Trigger:** Any modification to the core application logic (`src/main.ts`), supporting scripts (`scripts/`), MCP server interactions (`blender-mcp` usage), or the overall development/deployment workflow.
+
+**Action:**
+1.  **Review Documentation:** Check all relevant documentation files in the `documentation/` directory (especially `agent_workflow.md`, `setup_guide.md`, `grabbing_mechanic.md`) for necessary updates reflecting the change.
+2.  **Review Configurations:** Check relevant configuration files (e.g., `.roomodes`, `package.json`, `vite.config.js`) for necessary updates.
+3.  **Update:** Make the required changes to documentation and configuration files to ensure they accurately represent the current state of the project and workflow.
+4.  **Rationale:** Maintaining consistency between code, workflow, documentation, and configuration is crucial for usability, onboarding new contributors (human or AI), and preventing errors caused by outdated information.

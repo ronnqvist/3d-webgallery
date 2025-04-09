@@ -68,3 +68,26 @@ To change the 3D models displayed in the experience:
 3.  **Do not edit `src/3d-model-list.json` manually**, as your changes will be overwritten.
 
 The application reads the auto-generated `src/3d-model-list.json` on startup and attempts to load, position, and create physics bodies for each listed model.
+
+## Adding Models via AI Agent (Roo Code / Cline)
+
+You can use an AI agent like Roo Code (Cline fork) integrated with the `blender-mcp` server to generate and add models directly to the gallery.
+
+**Quick How-To (using Roo Code):**
+
+1.  **Ensure Prerequisites:**
+    *   The `blender-mcp` server is running (e.g., start with `uvx blender-mcp` in a terminal).
+    *   You are in the `3d-webgallery` project directory in VS Code.
+    *   Project dependencies are installed (`npm install`).
+2.  **Select Mode (Optional but Recommended):**
+    *   In the Roo Code chat, select the `Blender2webXR` custom mode (defined in `.roomodes`). This pre-configures the agent.
+3.  **Instruct the Agent:**
+    *   Ask Roo Code to generate a model (e.g., "Generate a model of a blue sphere").
+4.  **Agent Actions:** Roo Code will:
+    *   Use `blender-mcp` to generate the model.
+    *   Import it into Blender.
+    *   **Export** it as a `.glb` file to `public/3d-models/` (using an absolute path).
+    *   **Restart** the development server (`npm run dev`).
+5.  **Refresh:** Refresh your WebXR browser page connected to the dev server URL to see the new model.
+
+**For a detailed explanation of the workflow, troubleshooting, and manual configuration, see `documentation/agent_workflow.md`.**
