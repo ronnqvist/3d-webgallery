@@ -104,6 +104,7 @@ This file orchestrates the entire experience:
 
 A `vite.config.js` file was created to configure the Vite development server:
 
+*   `base: './'`: Configures Vite to use relative paths for assets, necessary for deployment to a subdirectory like GitHub Pages.
 *   `server.host: true`: Allows Vite to listen on all network interfaces.
 *   `server.hmr.clientPort: 443`: Helps Hot Module Replacement (HMR) work correctly when accessed via HTTPS tunnels.
 *   `server.allowedHosts: ['.ngrok-free.app']`: Allows access from any host ending in `.ngrok-free.app`, specifically configured to work easily with ngrok tunnels during development.
