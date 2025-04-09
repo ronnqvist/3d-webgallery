@@ -4,7 +4,7 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import modelPaths from './model-list.json'; // Import the list of models
+import modelPaths from './3d-model-list.json'; // Import the list of models (renamed)
 
 // --- Core Three.js Setup ---
 const scene = new THREE.Scene();

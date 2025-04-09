@@ -4,8 +4,9 @@
   "description": "A 3D Web Gallery application allowing users to view and interact with GLB models in WebXR using Three.js, Cannon-es, and Vite.",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build"
+    "generate-models": "node scripts/generate-model-list.js",
+    "dev": "npm run generate-models && vite",
+    "build": "npm run generate-models && vite build"
   },
   "keywords": [],
   "author": "",

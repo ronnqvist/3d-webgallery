@@ -32,8 +32,8 @@ The main files and directories involved are:
 
 *   `index.html`: The entry point for the web application.
 *   `src/main.ts`: The primary TypeScript file containing all the application logic.
-*   `src/model-list.json`: A JSON file containing a list of paths to the GLB models to be loaded.
-*   `package.json`: Manages project dependencies and scripts.
+*   `src/3d-model-list.json`: An auto-generated JSON file containing paths to the GLB models found in `public/3d-models/`.
+*   `package.json`: Manages project dependencies and scripts (including the model list generation script).
 *   `tsconfig.json`: TypeScript configuration for the project.
 *   `vite.config.js`: Configuration file for the Vite development server.
 *   `public/`: Directory for static assets. Vite copies its contents to the build output root.
@@ -62,7 +62,7 @@ This file orchestrates the entire experience:
     *   Adds visual models for the controllers using `XRControllerModelFactory`.
     *   Sets the renderer's animation loop using `renderer.setAnimationLoop(animate)` for VR compatibility.
 *   **Model Loading:**
-    *   Imports the list of model paths from `src/model-list.json`.
+    *   Imports the list of model paths from the auto-generated `src/3d-model-list.json`.
     *   Uses `GLTFLoader` to load all `.glb` files specified in the imported list.
     *   Positions the loaded models in the scene with spacing.
     *   Enables shadows for the models.
@@ -134,8 +134,7 @@ The development server (`npm run dev`) is great for coding, but for deployment t
 ## Managing Models
 
 1.  Place your `.glb` model files inside the `public/3d-models/` directory.
-2.  Edit the `src/model-list.json` file.
-3.  Add the relative path (starting with `3d-models/`, e.g., `3d-models/your-model.glb`) for each model you want to load into the JSON array.
-4.  Restart the Vite development server (`npm run dev`) for the changes to take effect.
+2.  Run `npm run dev` or `npm run build`. The `scripts/generate-model-list.js` script (invoked by the `dev` and `build` npm scripts) will automatically scan `public/3d-models/` and update `src/3d-model-list.json`.
+3.  **Do not edit `src/3d-model-list.json` manually.**
 
-The application (`src/main.ts`) will automatically read this JSON file and attempt to load, position, and create physics bodies for each listed model.
+The application (`src/main.ts`) reads the auto-generated `src/3d-model-list.json` and attempts to load, position, and create physics bodies for each listed model.

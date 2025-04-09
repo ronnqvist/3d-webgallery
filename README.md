@@ -1,4 +1,4 @@
-# 3D Web Gallery (WebXR with Physics Grabbing)
+# 3D Web Gallery
 
 This project is a 3D Web Gallery application allowing users to view and interact with 3D models (`.glb` files) in a WebXR virtual reality environment. It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server.
 
@@ -6,7 +6,7 @@ Users can enter a VR space, see models loaded from a specified list, point at th
 
 ## Features
 
-*   Loads GLB models specified in `src/model-list.json`.
+*   Loads GLB models specified in `src/3d-model-list.json` (auto-generated from `public/3d-models/`).
 *   WebXR support via Three.js `VRButton`.
 *   Physics simulation using Cannon-es (gravity, collisions).
 *   Raycaster-based grabbing from controllers (unlimited distance).
@@ -63,8 +63,7 @@ The `dist` directory contains the optimized HTML, JavaScript, and any assets (li
 To change the 3D models displayed in the experience:
 
 1.  Place your `.glb` model files inside the `public/3d-models/` directory.
-2.  Edit the `src/model-list.json` file.
-3.  Add or modify the relative path (starting with `3d-models/`, e.g., `3d-models/your-model.glb`) for each model you want to load within the JSON array.
-4.  **Important:** Restart the Vite development server (`npm run dev`) for the changes to the model list to take effect.
+2.  Run `npm run dev` or `npm run build`. The `src/3d-model-list.json` file will be automatically updated by the `scripts/generate-model-list.js` script based on the `.glb` files found in `public/3d-models/`.
+3.  **Do not edit `src/3d-model-list.json` manually**, as your changes will be overwritten.
 
-The application will automatically read `src/model-list.json` on startup and attempt to load, position, and create physics bodies for each listed model.
+The application reads the auto-generated `src/3d-model-list.json` on startup and attempts to load, position, and create physics bodies for each listed model.

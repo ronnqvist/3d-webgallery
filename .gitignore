@@ -1,6 +1,9 @@
 # Dependencies
 /node_modules
 
+# Build output
+/dist
+
 # Logs
 logs
 *.log
@@ -68,4 +71,7 @@ web_modules/
 *.swp
 *.swo
 
-# NOTE: /dist is intentionally NOT ignored to keep build output in the repo.
+# Source models (copied to /docs during build)
+# Ignore model files, but keep the directory structure via .gitkeep
+/public/3d-models/*
+!/public/3d-models/.gitkeep
