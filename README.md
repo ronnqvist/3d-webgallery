@@ -86,6 +86,8 @@ The application reads the auto-generated `src/3d-model-list.json` on startup and
 
 Experience the magic of generating 3D models with simple text prompts and seeing them materialize in your VR gallery moments later! This workflow uses an AI agent like Roo Code integrated with the `blender-mcp` server.
 
+**[🎬 Watch a video demonstration of this workflow!](https://x.com/ronnqvist/status/1910031251232207220)**
+
 **Quick How-To (using Roo Code):**
 
 1.  **Ensure Prerequisites:**

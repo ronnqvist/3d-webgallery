@@ -1,5 +1,7 @@
 # Agent Workflow: Adding 3D Models via Blender-MCP
 
+**[🎬 Watch a video demonstration of this workflow!](https://x.com/ronnqvist/status/1910031251232207220)**
+
 This document outlines the workflow for using an AI agent (like Cline, Roo Code, Cursor, etc.) equipped with the `blender-mcp` tool to generate new 3D models from text prompts and add them almost instantly to the 3D Web Gallery project (`3d-webgallery`). This enables a rapid, iterative cycle where users can prompt for objects and see them appear in their VR headset moments later after a simple browser refresh.
 
 ## Goal
