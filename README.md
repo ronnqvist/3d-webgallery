@@ -1,5 +1,7 @@
 # 3D Web Gallery
 
+**[➡️ View Live Demo Here!](https://ronnqvist.github.io/3d-webgallery/)**
+
 This project showcases a 3D Web Gallery application allowing users to view and interact with 3D models (`.glb` files) in a WebXR virtual reality environment. **Leveraging AI agents and the `blender-mcp` server, you can prompt for new 3D models and see them appear in your VR headset almost instantly after a quick browser refresh!**
 
 It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server. Users can enter a VR space, see models loaded from a specified list, point at them with VR controllers, grab them from any distance, move them around, and throw them using physics.
