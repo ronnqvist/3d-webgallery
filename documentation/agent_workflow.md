@@ -18,8 +18,18 @@ This workflow enables an AI agent to seamlessly integrate AI-generated 3D models
     *   **(Optional) AI Agent Environment:**
         *   **[VS Code](https://code.visualstudio.com/):** Recommended editor.
         *   **[Roo Code (Cline fork)](https://github.com/RooVetGit/Roo-Code):** The VS Code extension used in examples (or a similar AI agent).
-*   **MCP Server:**
-    *   **[`blender-mcp`](https://github.com/ahujasid/blender-mcp):** This MCP server must be installed and running. You can typically start it by running `uvx blender-mcp` in a separate terminal. Ensure the agent uses the correct server name `github.com/ahujasid/blender-mcp` when calling tools.
+*   **MCP Server Setup:**
+    1.  **Install [`blender-mcp`](https://github.com/ahujasid/blender-mcp):** Follow the installation instructions in its repository (likely involves installing the Blender addon and the server CLI, e.g., via `pipx` or `uvx`).
+    2.  **Configure Blender Addon:**
+        *   Open Blender.
+        *   Ensure the "Blender MCP" addon is enabled (Edit > Preferences > Add-ons).
+        *   Open the Blender MCP panel (typically in the 3D Viewport sidebar, press 'N', find the "BlenderMCP" tab).
+        *   Check "Use assets from Poly Haven".
+        *   Check "Use Hyper3D Rodin 3D model generation".
+        *   Select `hyper3d.ai` from the "Rodin Model" dropdown.
+        *   Click "Set Free Trial API Key" (or enter your own API key if you have one).
+    3.  **Start External Server:** *After* configuring the addon in Blender, open a separate terminal and run the command to start the server (e.g., `uvx blender-mcp`). Leave this terminal running.
+    4.  **Agent Usage:** Ensure the AI agent uses the correct server name `github.com/ahujasid/blender-mcp` when calling tools.
 *   **Project Setup:**
     *   The `3d-webgallery` project code must be available in the agent's working directory.
     *   Project dependencies must be installed (`npm install`). Running `npm install` again is recommended after switching OS environments or if encountering issues.
