@@ -1,8 +1,17 @@
 # 3D Web Gallery
 
-This project is a 3D Web Gallery application allowing users to view and interact with 3D models (`.glb` files) in a WebXR virtual reality environment. It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server.
+This project showcases a 3D Web Gallery application allowing users to view and interact with 3D models (`.glb` files) in a WebXR virtual reality environment. **Leveraging AI agents and the `blender-mcp` server, you can prompt for new 3D models and see them appear in your VR headset almost instantly after a quick browser refresh!**
 
-Users can enter a VR space, see models loaded from a specified list, point at them with VR controllers, grab them from any distance, move them around, and throw them using physics.
+It uses Three.js for rendering, Cannon-es for physics simulation, and Vite for the development server. Users can enter a VR space, see models loaded from a specified list, point at them with VR controllers, grab them from any distance, move them around, and throw them using physics.
+
+## Core Technologies
+
+This project utilizes the following key technologies:
+
+*   **[Three.js](https://threejs.org/):** For 3D rendering via WebGL.
+*   **[Cannon-es](https://pmndrs.github.io/cannon-es/):** For physics simulation.
+*   **[Vite](https://vitejs.dev/):** For the development server and build process.
+*   **[WebXR Device API](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API):** For virtual reality support.
 
 ## Features
 
@@ -69,25 +78,26 @@ To change the 3D models displayed in the experience:
 
 The application reads the auto-generated `src/3d-model-list.json` on startup and attempts to load, position, and create physics bodies for each listed model.
 
-## Adding Models via AI Agent (Roo Code / Cline)
+## Adding Models via AI Agent (Roo Code) - Live VR Generation! ✨
 
-You can use an AI agent like Roo Code (Cline fork) integrated with the `blender-mcp` server to generate and add models directly to the gallery.
+Experience the magic of generating 3D models with simple text prompts and seeing them materialize in your VR gallery moments later! This workflow uses an AI agent like Roo Code integrated with the `blender-mcp` server.
 
 **Quick How-To (using Roo Code):**
 
 1.  **Ensure Prerequisites:**
-    *   The `blender-mcp` server is running (e.g., start with `uvx blender-mcp` in a terminal).
-    *   You are in the `3d-webgallery` project directory in VS Code.
-    *   Project dependencies are installed (`npm install`).
+    *   **Software:** [VS Code](https://code.visualstudio.com/), [Node.js](https://nodejs.org/), [Blender](https://www.blender.org/) installed.
+    *   **Agent:** [Roo Code (Cline fork)](https://github.com/RooVetGit/Roo-Code) extension installed in VS Code.
+    *   **MCP Server:** The **[`blender-mcp`](https://github.com/ahujasid/blender-mcp)** server is installed and running (e.g., start with `uvx blender-mcp` in a terminal).
+    *   **Project:** You are in the `3d-webgallery` project directory in VS Code, and dependencies are installed (`npm install`).
 2.  **Select Mode (Optional but Recommended):**
     *   In the Roo Code chat, select the `Blender2webXR` custom mode (defined in `.roomodes`). This pre-configures the agent.
 3.  **Instruct the Agent:**
     *   Ask Roo Code to generate a model (e.g., "Generate a model of a blue sphere").
-4.  **Agent Actions:** Roo Code will:
-    *   Use `blender-mcp` to generate the model.
-    *   Import it into Blender.
-    *   **Export** it as a `.glb` file to `public/3d-models/` (using an absolute path).
-    *   **Restart** the development server (`npm run dev`).
-5.  **Refresh:** Refresh your WebXR browser page connected to the dev server URL to see the new model.
+4.  **Agent Actions:** Roo Code works its magic:
+    *   Uses `blender-mcp` to generate the 3D model from your prompt.
+    *   Imports the model into Blender.
+    *   **Exports** it as a `.glb` file directly into the project's `public/3d-models/` folder.
+    *   **Restarts** the development server (`npm run dev`) to include the new model.
+5.  **Refresh & View in VR!** Simply refresh your WebXR browser page (the one connected to the dev server URL). Your newly prompted model will appear in the gallery, ready for interaction! Repeat the process to populate your gallery iteratively.
 
-**For a detailed explanation of the workflow, troubleshooting, and manual configuration, see `documentation/agent_workflow.md`.**
+**For a detailed technical explanation of the workflow, troubleshooting, and manual configuration, see `documentation/agent_workflow.md`.**

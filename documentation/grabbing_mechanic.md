@@ -1,6 +1,6 @@
 # 3D Web Gallery: Object Grabbing Mechanic
 
-This document details the implementation of the VR object grabbing mechanic for the 3D Web Gallery project, using Three.js for rendering and Cannon-es for physics, focusing on raycaster-based interaction suitable for controllers like those on the Meta Quest.
+This document details the implementation of the VR object grabbing mechanic for the 3D Web Gallery project, using [Three.js](https://threejs.org/) for rendering and [Cannon-es](https://pmndrs.github.io/cannon-es/) for physics, focusing on raycaster-based interaction suitable for controllers like those on the Meta Quest.
 
 ## Core Concepts
 
@@ -8,7 +8,7 @@ The fundamental approach involves:
 
 1.  **Raycasting:** Projecting a ray forward from the VR controller.
 2.  **Intersection Detection:** Checking if this ray intersects with designated "grabbable" objects in the scene.
-3.  **Controller Events:** Using the `selectstart` (button press) and `selectend` (button release) events from the WebXR controller API.
+3.  **Controller Events:** Using the `selectstart` (button press) and `selectend` (button release) events from the [WebXR controller API](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API).
 4.  **Object Attachment:** Attaching the visual representation (Three.js `Group` or `Mesh`) of the grabbed object to the controller's Three.js object.
 5.  **Physics Integration:**
     *   Switching the corresponding physics body (Cannon-es `Body`) to `KINEMATIC` while grabbed, so it follows the controller without being affected by physics forces directly.

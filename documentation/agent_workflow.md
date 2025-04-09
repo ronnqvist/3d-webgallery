@@ -1,21 +1,28 @@
 # Agent Workflow: Adding 3D Models via Blender-MCP
 
-This document outlines the workflow for using an AI agent (like Cline, Roo Code, Cursor, etc.) equipped with the `blender-mcp` tool to generate new 3D models and add them to the 3D Web Gallery project (`3d-webgallery`) so they appear live after a server restart and browser refresh.
+This document outlines the workflow for using an AI agent (like Cline, Roo Code, Cursor, etc.) equipped with the `blender-mcp` tool to generate new 3D models from text prompts and add them almost instantly to the 3D Web Gallery project (`3d-webgallery`). This enables a rapid, iterative cycle where users can prompt for objects and see them appear in their VR headset moments later after a simple browser refresh.
 
 ## Goal
 
-To enable an AI agent to:
-1.  Generate a `.glb` 3D model using `blender-mcp`.
-2.  Save the generated model into the correct project directory (`public/3d-models/`).
-3.  Restart the project's development server (`npm run dev`) to update the model list.
-4.  Allow a user viewing the gallery in a WebXR device (connected to the dev server) to see the new model by simply refreshing their browser.
+This workflow enables an AI agent to seamlessly integrate AI-generated 3D models into the live WebXR gallery:
+1.  Generate a `.glb` 3D model based on a user's prompt using `blender-mcp`.
+2.  Automatically save the generated model into the project's `public/3d-models/` directory.
+3.  Restart the project's development server (`npm run dev`) to include the new model in the gallery list.
+4.  Allow a user viewing the gallery in a WebXR device (connected to the dev server) to **see the newly prompted model appear** simply by refreshing their browser, ready for interaction.
 
 ## Prerequisites
 
-*   **Blender-MCP Server Running:** The `blender-mcp` server must be running. You can typically start it by running `uvx blender-mcp` in a separate terminal. Ensure the agent uses the correct server name `github.com/ahujasid/blender-mcp` when calling tools.
-*   **Project:** The `3d-webgallery` project code must be available in the agent's working directory.
-*   **Node.js & npm:** Must be installed on the system where the agent executes commands.
-*   **Dependencies:** Project dependencies must be installed (`npm install` should have been run previously in the project directory, especially after switching OS environments like from WSL to Windows). Running `npm install` again is recommended if encountering issues starting the server.
+*   **Software:**
+    *   **[Blender](https://www.blender.org/):** The 3D modeling software must be installed.
+    *   **[Node.js & npm](https://nodejs.org/):** Required for running the project and installing dependencies.
+    *   **(Optional) AI Agent Environment:**
+        *   **[VS Code](https://code.visualstudio.com/):** Recommended editor.
+        *   **[Roo Code (Cline fork)](https://github.com/RooVetGit/Roo-Code):** The VS Code extension used in examples (or a similar AI agent).
+*   **MCP Server:**
+    *   **[`blender-mcp`](https://github.com/ahujasid/blender-mcp):** This MCP server must be installed and running. You can typically start it by running `uvx blender-mcp` in a separate terminal. Ensure the agent uses the correct server name `github.com/ahujasid/blender-mcp` when calling tools.
+*   **Project Setup:**
+    *   The `3d-webgallery` project code must be available in the agent's working directory.
+    *   Project dependencies must be installed (`npm install`). Running `npm install` again is recommended after switching OS environments or if encountering issues.
 
 ## Workflow Steps for the Agent
 
@@ -153,10 +160,10 @@ To enable an AI agent to:
     *   **Troubleshooting:** If `npm run dev` fails to find `vite` (as seen during testing, possibly due to environment path issues after OS switch), try running the steps separately:
         1.  Run `npm run generate-models` first.
         2.  Then run `node_modules/.bin/vite` directly.
-8.  **Inform User:**
-    *   Notify the user that the model (`<new_model_name>.glb`) has been generated, exported, and added.
+8.  **Inform User & Celebrate!** 🎉
+    *   Notify the user that the model (`<new_model_name>.glb`) has been generated, exported, and added to the project.
     *   Confirm that the development server has been restarted (or started).
-    *   Instruct the user to **refresh the browser tab** where they are viewing the 3D Web Gallery (connected to the development server URL). The new model should now appear.
+    *   Instruct the user to **refresh their VR browser tab** connected to the development server URL. Their newly prompted creation should now be visible in the gallery!
 
 ## Using the Custom Roo Code Mode (`.roomodes`)
 

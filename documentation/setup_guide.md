@@ -14,10 +14,10 @@ The aim is to build a 3D Web Gallery experience where users can enter a virtual 
 
 We installed the necessary libraries using npm:
 
-*   **`three`**: The core 3D graphics library.
+*   **[`three`](https://threejs.org/)**: The core 3D graphics library.
 *   **`@types/three`**: TypeScript definitions for Three.js.
-*   **`cannon-es`**: A physics engine for handling collisions, gravity, and forces.
-*   **`vite`**: A fast development server and build tool (installed as a dev dependency).
+*   **[`cannon-es`](https://pmndrs.github.io/cannon-es/)**: A physics engine for handling collisions, gravity, and forces.
+*   **[`vite`](https://vitejs.dev/)**: A fast development server and build tool (installed as a dev dependency).
 
 Installation command (reflecting actual steps):
 
@@ -53,9 +53,9 @@ A basic HTML file was created with:
 
 This file orchestrates the entire experience:
 
-*   **Core Three.js Setup:** Initializes the `Scene`, `PerspectiveCamera`, `WebGLRenderer`, ambient and directional lighting, and enables shadows.
-*   **Physics Setup:** Creates a `CANNON.World` with gravity, defines a physics timestep, and adds a static ground `CANNON.Plane`.
-*   **WebXR Integration:**
+*   **Core [Three.js](https://threejs.org/) Setup:** Initializes the `Scene`, `PerspectiveCamera`, `WebGLRenderer`, ambient and directional lighting, and enables shadows.
+*   **Physics Setup:** Creates a [`CANNON.World`](https://pmndrs.github.io/cannon-es/docs/classes/World.html) with gravity, defines a physics timestep, and adds a static ground `CANNON.Plane`.
+*   **[WebXR](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API) Integration:**
     *   Enables WebXR on the `WebGLRenderer`.
     *   Adds the `VRButton` to the document for entering VR.
     *   Gets references to the two VR controllers (`renderer.xr.getController(0/1)`).
