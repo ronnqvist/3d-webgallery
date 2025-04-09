@@ -95,6 +95,7 @@ This workflow enables an AI agent to seamlessly integrate AI-generated 3D models
         *   Call Blender's GLTF exporter (`bpy.ops.export_scene.gltf`).
         *   Specify the **absolute `filepath`** pointing to the `public/3d-models/` directory within the project, using the desired filename (e.g., `<PROJECT_ROOT>/public/3d-models/vintage_radio.glb`). **Crucially, testing shows Blender requires an absolute path here to avoid permission errors.** The agent must construct this absolute path.
         *   Set `export_format='GLB'` and `use_selection=True`.
+    *   **Note:** If the `execute_blender_code` step for export fails (e.g., due to intermittent issues), the agent should retry the export command 1-2 times with a short delay before reporting failure.
     *   *Example Python Script (pass as string in `code` argument - Agent must construct the absolute `export_dir` path dynamically):*
         ```python
         import bpy
@@ -215,7 +216,7 @@ You are an AI assistant integrated with the '3d-webgallery' project. Your curren
 
 **Important Notes:**
 *   Always clear the scene first.
-*   The **Export Model** step using `execute_blender_code` is essential and **requires an absolute path** for the export directory (which you must construct).
+*   The **Export Model** step using `execute_blender_code` is essential and **requires an absolute path** for the export directory (which you must construct). Retry export if it fails.
 *   The **Restart Server** step (`npm run dev` or equivalent) is essential to update the web app's model list.
 *   Handle potential failures (like the import needing a retry) gracefully.
 *   Assume Hyper3D and Poly Haven are enabled in the Blender MCP addon as per the prerequisites; do not ask the user to confirm these settings.
